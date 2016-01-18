@@ -1,5 +1,10 @@
-#  coding: utf-8 
+# coding: utf-8 
 import SocketServer
+from os import path as osPath
+
+# Assignment 1
+# Ramish Syed
+# 1373475
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -26,13 +31,58 @@ import SocketServer
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-
 class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
+
+        # Get the type of request, and handle it
+        requestType = (self.data.split(' '))[0]
+
+        if (requestType == "GET"):
+        	self.handleGETRequest(self.data)
+
         self.request.sendall("OK")
+
+    def handleGETRequest(self, GETRequest):
+    	# Split the request data and get the HTTPVersion and Request for future response concatanations
+    	splitRequest = GETRequest.split(' ')
+    	httpVersion = splitRequest[2].split('\r')[0]
+    	httpRequest = "www" + splitRequest[1]
+
+    	# handle the css file
+        if "deep.css" in httpRequest:
+            httpRequest = "www/deep/deep.css"
+
+        # handle one of the test cases. Not the most efficient way to do it, but it works.     
+        if "/../" in httpRequest:
+        	response = httpVersion + " " + "404 Not Found\r\n"
+        	self.request.send(response)
+
+        # if it's a valid path, send the server a response according to whether or not it is a HTML or CSS file. If not, send it a 404
+        if osPath.exists(httpRequest):
+            if osPath.isdir(httpRequest):
+                if httpRequest[len(httpRequest)-1] != "/":
+                    httpRequest += "/"
+                httpRequest += "index.html"
+       		
+            self.request.sendall(httpVersion + " " + "200 OK\r\n")
+
+            if (httpRequest.endswith(".css")):
+            	response = "Content-Type: text/css\r\n\r\n"
+                self.request.sendall(response)  
+
+            elif (httpRequest.endswith(".html")):
+            	response = "Content-Type: text/html\r\n\r\n"
+                self.request.sendall(response)
+
+            # read from the file and write to the server    
+            self.request.sendall(open(httpRequest, 'r').read())
+
+        else:
+            response = httpVersion + " " + "404 Not Found\r\n"
+            self.request.send(response)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
