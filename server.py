@@ -2,11 +2,7 @@
 import SocketServer
 from os import path as osPath
 
-# Assignment 1
-# Ramish Syed
-# 1373475
-
-# Copyright 2013 Abram Hindle, Eddie Antonio Santos
+# Copyright 2013 Abram Hindle, Eddie Antonio Santos, Ramish Syed
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
